@@ -6,7 +6,7 @@ import name.panitz.game.framework.Vertex;
 
 public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
-  static final int GRID_WIDTH = 44;
+  static final int GRID_WIDTH = 70;
   static final int GRID_HEIGHT = 37;
   static final int BLOCK_WIDTH = 17;
   static final int BLOCK_HEIGHT = 22;
@@ -18,9 +18,6 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         new Drake<>(new Vertex(BLOCK_WIDTH * GRID_WIDTH / 2,
             BLOCK_HEIGHT * GRID_HEIGHT / 2)),
         BLOCK_WIDTH * GRID_WIDTH, BLOCK_HEIGHT * GRID_HEIGHT);
-//    new Drake<>(new Vertex(BLOCK_WIDTH * GRID_WIDTH / 2,
-//        BLOCK_HEIGHT * GRID_HEIGHT)),
-//    BLOCK_WIDTH * GRID_WIDTH, BLOCK_HEIGHT * GRID_HEIGHT);
     drake = (Drake<I>) getPlayer();
   }
 
