@@ -1,0 +1,4 @@
+
+
+
+--module-path /opt/lib/javafx-sdk-13.0.2/lib --add-modules javafx.controls

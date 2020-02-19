@@ -4,10 +4,12 @@ import name.panitz.game.framework.ImageObject;
 import name.panitz.game.framework.Vertex;
 
 public class LeftRightgImage<I> extends ImageObject<I> {
-  double v0;
-  int t = 0;
 
-  public boolean isJumping = false;
+  Direction direction = Direction.RIGHT;
+
+  enum Direction {
+    LEFT, RIGHT, UP, DOWN;
+  }
 
   public LeftRightgImage(String imageFileName, Vertex corner, Vertex movement) {
     super(imageFileName, corner, movement);
@@ -17,7 +19,6 @@ public class LeftRightgImage<I> extends ImageObject<I> {
     getPos().move(getVelocity().mult(-1.1));
     getVelocity().x = 0;
     getVelocity().y = 0;
-    isJumping = false;
   }
 
   public void restart() {
@@ -25,43 +26,62 @@ public class LeftRightgImage<I> extends ImageObject<I> {
     getPos().move(getVelocity().mult(-1.1));
     getVelocity().x = -oldX;
     getVelocity().y = 0;
-    isJumping = false;
+  }
+
+  public void turnLeft() {
+    Vertex v = getVelocity();
+
+    if (v.x == 1 && v.y == 0) {
+      up();
+    } else if (v.x == 0 && v.y == -1) {
+      left();
+    } else if (v.x == -1 && v.y == 0) {
+      down();
+    } else if (v.x == 0 && v.y == 1) {
+      right();
+    }
+  }
+
+  public void turnRight() {
+    Vertex v = getVelocity();
+
+    if (v.x == 1 && v.y == 0) {
+      down();
+    } else if (v.x == 0 && v.y == 1) {
+      left();
+    } else if (v.x == -1 && v.y == 0) {
+      up();
+    } else if (v.x == 0 && v.y == -1) {
+      right();
+    }
+  }
+
+  public Direction getDirection() {
+    return direction;
   }
 
   public void left() {
-    Vertex v = getVelocity();
-
-    if (v.x == 1 && v.y == 0) {
-      getVelocity().x = 0;
-      getVelocity().y = -1;
-    } else if (v.x == 0 && v.y == -1) {
-      getVelocity().x = -1;
-      getVelocity().y = 0;
-    } else if (v.x == -1 && v.y == 0) {
-      getVelocity().x = 0;
-      getVelocity().y = 1;
-    } else if (v.x == 0 && v.y == 1) {
-      getVelocity().x = 1;
-      getVelocity().y = 0;
-    }
+    getVelocity().x = -1;
+    getVelocity().y = 0;
+    direction = Direction.LEFT;
   }
 
   public void right() {
-    Vertex v = getVelocity();
+    getVelocity().x = 1;
+    getVelocity().y = 0;
+    direction = Direction.RIGHT;
+  }
 
-    if (v.x == 1 && v.y == 0) {
-      getVelocity().x = 0;
-      getVelocity().y = 1;
-    } else if (v.x == 0 && v.y == 1) {
-      getVelocity().x = -1;
-      getVelocity().y = 0;
-    } else if (v.x == -1 && v.y == 0) {
-      getVelocity().x = 0;
-      getVelocity().y = -1;
-    } else if (v.x == 0 && v.y == -1) {
-      getVelocity().x = 1;
-      getVelocity().y = 0;
-    }
+  public void up() {
+    getVelocity().x = 0;
+    getVelocity().y = -1;
+    direction = Direction.UP;
+  }
+
+  public void down() {
+    getVelocity().x = 0;
+    getVelocity().y = 1;
+    direction = Direction.DOWN;
   }
 
   @Override

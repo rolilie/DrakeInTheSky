@@ -6,19 +6,20 @@ import name.panitz.game.framework.Vertex;
 
 public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
-  static final int GRID_WIDTH = 70;
-  static final int GRID_HEIGHT = 37;
-  static final int BLOCK_WIDTH = 17;
-  static final int BLOCK_HEIGHT = 22;
+  static final int GRID_WIDTH = 40;
+  static final int GRID_HEIGHT = 28;
+  static final int BLOCK_WIDTH = 35;
+  static final int BLOCK_HEIGHT = 35;
 
   Drake<I> drake;
 
   public DrakeInTheSky() {
-    super(
-        new Drake<>(new Vertex(BLOCK_WIDTH * GRID_WIDTH / 2,
-            BLOCK_HEIGHT * GRID_HEIGHT / 2)),
+    super(new Drake<>(new Vertex(BLOCK_WIDTH * GRID_WIDTH / 2, BLOCK_HEIGHT * GRID_HEIGHT / 2), BLOCK_WIDTH),
         BLOCK_WIDTH * GRID_WIDTH, BLOCK_HEIGHT * GRID_HEIGHT);
     drake = (Drake<I>) getPlayer();
+
+    getGOss().add(drake.getBody());
+    getGOss().add(drake.getTail());
   }
 
   @Override
@@ -29,17 +30,18 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
   @Override
   public void keyPressedReaction(KeyCode keycode) {
-    if (keycode != null)
+    if (keycode != null) {
       switch (keycode) {
       case LEFT_ARROW:
-        drake.left();
+        drake.turnLeft();
         break;
       case RIGHT_ARROW:
-        drake.right();
+        drake.turnRight();
         break;
       default:
         ;
       }
+    }
   }
 
 }
