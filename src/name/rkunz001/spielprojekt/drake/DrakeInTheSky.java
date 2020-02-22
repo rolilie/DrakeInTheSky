@@ -10,54 +10,97 @@ import name.panitz.game.framework.Vertex;
 
 public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
-  static final int GRID_WIDTH = 40;
-  static final int GRID_HEIGHT = 28;
-  static final int BLOCK_WIDTH = 35;
-  static final int BLOCK_HEIGHT = 35;
-  int points = 0;
-  int collectedFruits = 0;
+  int blockSize;
+  int width;
+  int height;
+  int blocksX;
+  int blocksY;
+  boolean xPressed = false;
+  boolean gameOver = false;
 
-  List<Apple<I>> apples = new ArrayList<>();
+  int score = 0;
+  int collectedObjects = 0;
+
+  enum ScoreObjects {
+    APPLE, BANANA, CHERRY;
+  }
+
+  List<ScoreObject<I>> scoreObjects = new ArrayList<>();
   Drake<I> drake;
 
-  public DrakeInTheSky() {
-    super(new Drake<>(new Vertex(BLOCK_WIDTH * GRID_WIDTH / 2, BLOCK_HEIGHT * GRID_HEIGHT / 2), BLOCK_WIDTH),
-        BLOCK_WIDTH * GRID_WIDTH, BLOCK_HEIGHT * GRID_HEIGHT);
-    drake = (Drake<I>) getPlayer();
+  public DrakeInTheSky(int blocksX, int blocksY, int blockSize) {
+    super(new Drake<>(new Vertex(blocksX / 2 * blockSize, blocksY / 2 * blockSize), 5, blockSize, blocksX * blockSize,
+        blocksY * blockSize), blocksX * blockSize, blocksY * blockSize);
+    this.blockSize = blockSize;
+    this.blocksX = blocksX;
+    this.blocksY = blocksY;
+    this.width = blocksX * blockSize;
+    this.height = blocksY * blockSize;
+    this.drake = (Drake<I>) getPlayer();
 
     getGOss().add(drake.getBody());
     getGOss().add(drake.getTail());
 
-    newFruit();
+    newScoreObject();
   }
 
   @Override
   public void paintTo(GraphicsTool<I> g) {
     super.paintTo(g);
-    g.drawString(50, 10, "Points: " + points);
-    g.drawString(50, 30, "Body size: " + drake.getBody().size());
-    g.drawString(50, 50, "Fruits: " + collectedFruits);
+    g.drawString(50, 20, "Points   : " + score);
+    g.drawString(50, 40, "Body size: " + drake.getBody().size());
+    g.drawString(50, 60, "Collected: " + collectedObjects);
+    if (gameOver) {
+      g.drawString(50, 80, "Game over");
+    }
   }
 
   @Override
   public void doChecks() {
-    if (drake.touches(apples.get(0))) {
+    if (drake.getPos().x >= width - blockSize + 1 || drake.getPos().y >= height - blockSize + 1
+        || drake.getPos().x < 0.0 || drake.getPos().y < 0.0) {
+      drake.stop();
+      gameOver = true;
+    }
+
+    if (drake.touches(scoreObjects.get(0))) {
+      if (scoreObjects.get(0).getScore() < 0 && !xPressed || scoreObjects.get(0).getScore() > 0 && xPressed) {
+        drake.stop();
+        gameOver = true;
+      } else {
+        xPressed = false;
+      }
       drake.grow();
-      collectedFruits++;
-      points += 1;
+      collectedObjects++;
+      score += scoreObjects.get(0).getScore();
       moveFruit();
     }
   }
 
   @Override
   public void keyPressedReaction(KeyCode keycode) {
+    System.out.println("key pressed: " + keycode);
     if (keycode != null) {
       switch (keycode) {
       case LEFT_ARROW:
+        System.out.println("left arrow key pressed: " + keycode);
         drake.turnLeft();
         break;
       case RIGHT_ARROW:
+        System.out.println("right arrow key pressed: " + keycode);
         drake.turnRight();
+        break;
+      case VK_SPACE:
+        System.out.println("space key pressed: " + keycode);
+        if (drake.isStopped()) {
+          drake.restart();
+        } else {
+          drake.stop();
+        }
+        break;
+      case VK_X:
+        System.out.println("space key pressed: " + keycode);
+        xPressed = true;
         break;
       default:
         ;
@@ -65,18 +108,33 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     }
   }
 
-  private void newFruit() {
-    double x = (int) (Math.random() * (GRID_WIDTH - 1) * BLOCK_WIDTH);
-    double y = (int) (Math.random() * (GRID_HEIGHT - 1) * BLOCK_HEIGHT);
-    Apple<I> apple = new Apple<I>(new Vertex(x, y));
-    apples.add(apple);
-    getGOss().add(apples);
+  private void newScoreObject() {
+    int randomObj = (int) (Math.random() * 100);
+    ScoreObject<I> obj = null;
+    if (randomObj < 50) {
+      obj = new ScoreObject<I>("apple.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
+          -1);
+    } else if (randomObj < 80) {
+      obj = new ScoreObject<I>("dot.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0), 5);
+    } else if (randomObj < 95) {
+      obj = new ScoreObject<I>("heart.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
+          20);
+    } else if (randomObj <= 100) {
+      obj = new ScoreObject<I>("wall.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
+          -1);
+    }
+    if (obj != null) {
+      scoreObjects.add(obj);
+      getGOss().add(scoreObjects);
+    }
   }
 
   private void moveFruit() {
-    double x = (int) (Math.random() * (GRID_WIDTH - 1) * BLOCK_WIDTH);
-    double y = (int) (Math.random() * (GRID_HEIGHT - 1) * BLOCK_HEIGHT);
-    apples.get(0).getPos().x = x;
-    apples.get(0).getPos().y = y;
+    scoreObjects.get(0).getPos().x = getRandomXY(blocksX);
+    scoreObjects.get(0).getPos().y = getRandomXY(blocksY);
+  }
+
+  double getRandomXY(int base) {
+    return (int) (Math.random() * base) * blockSize;
   }
 }
