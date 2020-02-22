@@ -63,17 +63,21 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       gameOver = true;
     }
 
-    if (drake.touches(scoreObjects.get(0))) {
-      if (scoreObjects.get(0).getScore() < 0 && !xPressed || scoreObjects.get(0).getScore() > 0 && xPressed) {
+    if (scoreObjects.size() > 0 && drake.touches(scoreObjects.get(0))) {
+      ScoreObject<I> so = scoreObjects.remove(0);
+      getGOss().remove(so);
+      if (so.getScore() < 0 && !xPressed || so.getScore() > 0 && xPressed) {
         drake.stop();
         gameOver = true;
+        return;
       } else {
         xPressed = false;
       }
       drake.grow();
       collectedObjects++;
-      score += scoreObjects.get(0).getScore();
-      moveFruit();
+      score += so.getScore();
+      so = null;
+      newScoreObject();
     }
   }
 
@@ -113,7 +117,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     ScoreObject<I> obj = null;
     if (randomObj < 50) {
       obj = new ScoreObject<I>("apple.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-          -1);
+          1);
     } else if (randomObj < 80) {
       obj = new ScoreObject<I>("dot.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0), 5);
     } else if (randomObj < 95) {

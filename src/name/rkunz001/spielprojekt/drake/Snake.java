@@ -64,6 +64,9 @@ public class Snake<I> extends LeftRightgImage<I> {
 
   @Override
   public void move() {
+    if (stopped) {
+      return;
+    }
     System.out.println("Pos: " + getPos().x + ", " + getPos().y);
     if (nextTurn != Turn.NONE) {
 
@@ -85,7 +88,7 @@ public class Snake<I> extends LeftRightgImage<I> {
         }
         break;
       case DOWN:
-        if (getPos().y > turnY || getPos().x > height - blockSize - speed) {
+        if (getPos().y > turnY || getPos().y > height - blockSize - speed) {
           turn = true;
         }
         break;
@@ -114,30 +117,79 @@ public class Snake<I> extends LeftRightgImage<I> {
     moveBodyOrTail(tail.get(0), pre);
   }
 
-  synchronized protected void moveBodyOrTail(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
-    double absX = Math.abs(pre.getPos().x - obj.getPos().x);
-    double absY = Math.abs(pre.getPos().y - obj.getPos().y);
-    if (absX > blockSize || absY > blockSize) {
-      switch (pre.getDirection()) {
-      case LEFT:
-        obj.left();
+  protected void moveBodyOrTail(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+    switch (pre.getDirection()) {
+    case LEFT:
+      if (obj.getPos().x - pre.getPos().x > 35) {
         obj.getPos().x = pre.getPos().x + blockSize;
         obj.getPos().y = pre.getPos().y;
-        break;
-      case RIGHT:
-        obj.right();
+        obj.left();
+      }
+      break;
+    case RIGHT:
+      if (pre.getPos().x - obj.getPos().x > 35) {
         obj.getPos().x = pre.getPos().x - blockSize;
         obj.getPos().y = pre.getPos().y;
-        break;
-      case UP:
-        obj.up();
+        obj.right();
+      }
+      break;
+    case UP:
+      if (obj.getPos().y - pre.getPos().y > 35) {
         obj.getPos().x = pre.getPos().x;
         obj.getPos().y = pre.getPos().y + blockSize;
-        break;
-      case DOWN:
-        obj.down();
+        obj.up();
+      }
+      break;
+    case DOWN:
+      if (pre.getPos().y - obj.getPos().y > 35) {
         obj.getPos().x = pre.getPos().x;
         obj.getPos().y = pre.getPos().y - blockSize;
+        obj.down();
+      }
+      break;
+    }
+
+    adjust(obj, pre);
+  }
+
+  private void adjust(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+    if (obj.getDirection() == pre.getDirection()) {
+      switch (pre.getDirection()) {
+      case LEFT:
+        if (obj.getPos().y != pre.getPos().y) {
+          if (obj.getPos().y > pre.getPos().y) {
+            obj.up();
+          } else {
+            obj.down();
+          }
+        }
+        break;
+      case RIGHT:
+        if (obj.getPos().y != pre.getPos().y) {
+          if (obj.getPos().y > pre.getPos().y) {
+            obj.up();
+          } else {
+            obj.down();
+          }
+        }
+        break;
+      case UP:
+        if (obj.getPos().x != pre.getPos().x) {
+          if (obj.getPos().x > pre.getPos().x) {
+            obj.left();
+          } else {
+            obj.right();
+          }
+        }
+        break;
+      case DOWN:
+        if (obj.getPos().x != pre.getPos().x) {
+          if (obj.getPos().x > pre.getPos().x) {
+            obj.left();
+          } else {
+            obj.right();
+          }
+        }
         break;
       }
     }
@@ -198,6 +250,8 @@ public class Snake<I> extends LeftRightgImage<I> {
       turnY = getPos().y - getPos().y % blockSize + blockSize;
       break;
     }
+
+    System.out.println("turnX: " + turnX + ", turnY: " + turnY);
   }
 
   Direction nextDirection(Direction current) {
