@@ -8,9 +8,15 @@ import name.panitz.game.framework.Vertex;
 
 public class Snake<I> extends LeftRightgImage<I> {
 
-  private final static String HEAD_IMAGE = "player.png";
-  private final static String BODY_IMAGE = "fass.gif";
-  private final static String TAIL_IMAGE = "heart.png";
+  String headRight = "head.png";
+  String headLeft = "head.png";
+  String headUp = "head.png";
+  String headDown = "head.png";
+  String bodyImage = "body.png";
+  String tailRight = "tail.png";
+  String tailLeft = "tail.png";
+  String tailUp = "tail.png";
+  String tailDown = "tail.png";
 
   enum Turn {
     NONE, LEFT, RIGHT;
@@ -20,7 +26,6 @@ public class Snake<I> extends LeftRightgImage<I> {
   int width;
   int height;
   List<LeftRightgImage<I>> body = Collections.synchronizedList(new ArrayList<>());
-  // new ArrayList<>();
   List<LeftRightgImage<I>> tail = new ArrayList<>();
 
   boolean stopped = false;
@@ -29,18 +34,25 @@ public class Snake<I> extends LeftRightgImage<I> {
   double turnY;
   boolean growing = false;
 
-  public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize, int width, int height) {
-    super(HEAD_IMAGE, corner, velocity);
+  public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize, int width, int height, String headRight,
+      String bodyImage, String tailLeft) {
+    super(headRight, corner, velocity);
+    this.headRight = headRight;
+    this.bodyImage = bodyImage;
+    this.tailLeft = tailLeft;
     this.blockSize = blockSize;
     this.width = width;
     this.height = height;
 
     for (int i = 0; i < bodySize; i++) {
       body.add(
-          new LeftRightgImage<I>(BODY_IMAGE, new Vertex(corner.x - (i + 1) * blockSize, corner.y), new Vertex(1, 0)));
+          new LeftRightgImage<I>(bodyImage, new Vertex(corner.x - (i + 1) * blockSize, corner.y), new Vertex(1, 0)));
     }
-    tail.add(new LeftRightgImage<I>(TAIL_IMAGE, new Vertex(corner.x - (bodySize + 1) * blockSize, corner.y),
+    tail.add(new LeftRightgImage<I>(tailLeft, new Vertex(corner.x - (bodySize + 1) * blockSize, corner.y),
         new Vertex(1, 0)));
+  }
+
+  public void init(int bodySize) {
   }
 
   public List<LeftRightgImage<I>> getBody() {
@@ -62,25 +74,23 @@ public class Snake<I> extends LeftRightgImage<I> {
 
     switch (direction) {
     case DOWN:
-      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x, pre.getPos().y - blockSize),
-          new Vertex(0, 1));
+      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x, pre.getPos().y - blockSize), new Vertex(0, 1));
       obj.down();
       t.getPos().y = obj.getPos().y - blockSize;
       break;
     case LEFT:
-      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x + blockSize, pre.getPos().y),
+      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x + blockSize, pre.getPos().y),
           new Vertex(-1, 01));
       obj.left();
       t.getPos().x = obj.getPos().x + blockSize;
       break;
     case RIGHT:
-      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x, pre.getPos().y - blockSize),
-          new Vertex(1, 0));
+      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x, pre.getPos().y - blockSize), new Vertex(1, 0));
       obj.right();
       t.getPos().x = obj.getPos().x - blockSize;
       break;
     case UP:
-      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x, pre.getPos().y + blockSize),
+      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x, pre.getPos().y + blockSize),
           new Vertex(0, -1));
       obj.up();
       t.getPos().y = obj.getPos().y + blockSize;
@@ -88,6 +98,7 @@ public class Snake<I> extends LeftRightgImage<I> {
     default:
       break;
     }
+    obj.setSpeed(pre.getSpeed());
     return obj;
   }
 
@@ -116,7 +127,6 @@ public class Snake<I> extends LeftRightgImage<I> {
     if (stopped) {
       return;
     }
-    System.out.println("Pos: " + getPos().x + ", " + getPos().y);
     if (nextTurn != Turn.NONE) {
 
       boolean turn = false;
@@ -143,14 +153,29 @@ public class Snake<I> extends LeftRightgImage<I> {
         break;
       }
       if (turn) {
-        System.out.println("turnX: " + turnX + ", turnY: " + turnY + ", left: " + getPos().x + ", " + getPos().y);
-
         getPos().x = turnX;
         getPos().y = turnY;
         if (nextTurn == Turn.LEFT) {
           super.turnLeft();
         } else {
           super.turnRight();
+        }
+        switch (direction) {
+        case DOWN:
+          setImageFileName(headDown);
+          break;
+        case LEFT:
+          setImageFileName(headLeft);
+          break;
+        case RIGHT:
+          setImageFileName(headRight);
+          break;
+        case UP:
+          setImageFileName(headUp);
+          break;
+        default:
+          break;
+
         }
         nextTurn = Turn.NONE;
       }
@@ -308,8 +333,6 @@ public class Snake<I> extends LeftRightgImage<I> {
       turnY = getPos().y - getPos().y % blockSize + blockSize;
       break;
     }
-
-    System.out.println("turnX: " + turnX + ", turnY: " + turnY);
   }
 
   Direction nextDirection(Direction current) {

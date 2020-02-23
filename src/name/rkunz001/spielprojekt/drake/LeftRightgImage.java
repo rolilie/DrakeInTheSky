@@ -17,7 +17,7 @@ public class LeftRightgImage<I> extends ImageObject<I> {
     this.speed = speed;
   }
 
-  int speed = 3;
+  int speed = 1;
 
   enum Direction {
     LEFT, RIGHT, UP, DOWN;
