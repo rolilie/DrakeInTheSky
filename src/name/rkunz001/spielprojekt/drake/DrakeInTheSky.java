@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import name.panitz.game.framework.AbstractGame;
+import name.panitz.game.framework.GameObject;
 import name.panitz.game.framework.GraphicsTool;
 import name.panitz.game.framework.KeyCode;
 import name.panitz.game.framework.Vertex;
@@ -41,7 +42,8 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     getGOss().add(drake.getBody());
     getGOss().add(drake.getTail());
 
-    newScoreObject();
+    pause();
+
   }
 
   @Override
@@ -65,7 +67,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
     if (scoreObjects.size() > 0 && drake.touches(scoreObjects.get(0))) {
       ScoreObject<I> so = scoreObjects.remove(0);
-      getGOss().remove(so);
+      removeGameObject(scoreObjects, so);
       if (so.getScore() < 0 && !xPressed || so.getScore() > 0 && xPressed) {
         drake.stop();
         gameOver = true;
@@ -79,6 +81,12 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       so = null;
       newScoreObject();
     }
+  }
+
+  private void removeGameObject(List<? extends GameObject<I>> list, GameObject<I> obj) {
+    int i = getGOss().indexOf(list);
+    getGOss().get(i).remove(obj);
+    obj = null;
   }
 
   @Override
@@ -96,10 +104,13 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         break;
       case VK_SPACE:
         System.out.println("space key pressed: " + keycode);
-        if (drake.isStopped()) {
-          drake.restart();
+        if (isStopped()) {
+          if (scoreObjects.size() == 0) {
+            newScoreObject();
+          }
+          start();
         } else {
-          drake.stop();
+          pause();
         }
         break;
       case VK_X:
@@ -133,7 +144,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     }
   }
 
-  private void moveFruit() {
+  private void moveGameObject() {
     scoreObjects.get(0).getPos().x = getRandomXY(blocksX);
     scoreObjects.get(0).getPos().y = getRandomXY(blocksY);
   }

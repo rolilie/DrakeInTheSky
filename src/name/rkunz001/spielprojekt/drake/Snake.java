@@ -1,6 +1,7 @@
 package name.rkunz001.spielprojekt.drake;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import name.panitz.game.framework.Vertex;
@@ -18,18 +19,18 @@ public class Snake<I> extends LeftRightgImage<I> {
   int blockSize;
   int width;
   int height;
-  private int bodySize;
-  List<LeftRightgImage<I>> body = new ArrayList<>();
+  List<LeftRightgImage<I>> body = Collections.synchronizedList(new ArrayList<>());
+  // new ArrayList<>();
   List<LeftRightgImage<I>> tail = new ArrayList<>();
 
   boolean stopped = false;
   Turn nextTurn = Turn.NONE;
   double turnX;
   double turnY;
+  boolean growing = false;
 
   public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize, int width, int height) {
     super(HEAD_IMAGE, corner, velocity);
-    this.bodySize = bodySize;
     this.blockSize = blockSize;
     this.width = width;
     this.height = height;
@@ -51,15 +52,63 @@ public class Snake<I> extends LeftRightgImage<I> {
   }
 
   public void grow() {
-    LeftRightgImage<I> pre = body.get(bodySize - 1);
-    bodySize++;
-    body.add(new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x - (bodySize + 1) * blockSize, pre.getPos().y),
-        new Vertex(1, 0)));
+    growing = true;
   }
 
-  public void shrink() {
-    LeftRightgImage<I> del = body.remove(--bodySize);
-    LeftRightgImage<I> pre = body.get(bodySize - 1);
+  public LeftRightgImage<I> newBody(LeftRightgImage<I> pre) {
+
+    LeftRightgImage<I> t = tail.get(0);
+    LeftRightgImage<I> obj = null;
+
+    switch (direction) {
+    case DOWN:
+      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x, pre.getPos().y - blockSize),
+          new Vertex(0, 1));
+      obj.down();
+      t.getPos().y = obj.getPos().y - blockSize;
+      break;
+    case LEFT:
+      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x + blockSize, pre.getPos().y),
+          new Vertex(-1, 01));
+      obj.left();
+      t.getPos().x = obj.getPos().x + blockSize;
+      break;
+    case RIGHT:
+      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x, pre.getPos().y - blockSize),
+          new Vertex(1, 0));
+      obj.right();
+      t.getPos().x = obj.getPos().x - blockSize;
+      break;
+    case UP:
+      obj = new LeftRightgImage<I>(BODY_IMAGE, new Vertex(pre.getPos().x, pre.getPos().y + blockSize),
+          new Vertex(0, -1));
+      obj.up();
+      t.getPos().y = obj.getPos().y + blockSize;
+      break;
+    default:
+      break;
+    }
+    return obj;
+  }
+
+  public boolean shrink() {
+    if (body.size() > 0) {
+      LeftRightgImage<I> del = body.remove(body.size() - 1);
+      LeftRightgImage<I> pre = null;
+      if (body.size() > 1) {
+        pre = body.get(body.size() - 1);
+      } else {
+        pre = this;
+      }
+      tail.get(0).getPos().x = pre.getPos().x;
+      tail.get(0).getPos().y = pre.getPos().y;
+      pre.getPos().x = del.getPos().x;
+      pre.getPos().y = del.getPos().y;
+      del = null;
+      return true;
+    }
+
+    return false;
   }
 
   @Override
@@ -114,10 +163,17 @@ public class Snake<I> extends LeftRightgImage<I> {
       pre = b;
     }
 
+    if (growing) {
+      growing = false;
+      LeftRightgImage<I> b = newBody(pre);
+      body.add(b);
+      moveBodyOrTail(b, pre);
+    }
     moveBodyOrTail(tail.get(0), pre);
+
   }
 
-  protected void moveBodyOrTail(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+  synchronized protected void moveBodyOrTail(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
     switch (pre.getDirection()) {
     case LEFT:
       if (obj.getPos().x - pre.getPos().x > 35) {
@@ -149,10 +205,12 @@ public class Snake<I> extends LeftRightgImage<I> {
       break;
     }
 
-    adjust(obj, pre);
+    fixDirection(obj, pre);
   }
 
-  private void adjust(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+  // keys pressed twice in quick succession it required to correct the moving
+  // direction
+  private void fixDirection(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
     if (obj.getDirection() == pre.getDirection()) {
       switch (pre.getDirection()) {
       case LEFT:
