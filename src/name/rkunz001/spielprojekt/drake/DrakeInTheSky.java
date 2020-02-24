@@ -35,6 +35,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
   List<ScoreObject<I>> scoreObjects = new ArrayList<>();
   ImageObject<I> background;
   ImageObject<I> help;
+  ImageObject<I> gameoverImage;
 
   enum ScoreObjects {
     APPLE, BANANA, CHERRY;
@@ -56,7 +57,8 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         new Vertex(0, 0));
     help = new LeftRightgImage<I>("start-screen.png", new Vertex(0, 0),
         new Vertex(0, 0));
-
+    gameoverImage = new LeftRightgImage<I>("gameover-screen.png",
+        new Vertex(0, 0), new Vertex(0, 0));
     pause();
 
   }
@@ -91,7 +93,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     if (getHelp) {
       help.paintTo(g);
     } else if (gameOver) {
-      help.paintTo(g);
+      gameoverImage.paintTo(g);
       g.drawString(50, 40, "Points   : " + score);
       g.drawString(50, 60, "Body size: " + drake.getBody().size());
       g.drawString(50, 80, "Collected: " + collectedObjects);
@@ -112,7 +114,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
   @Override
   public void doChecks() {
     for (ImageObject<I> c : cloud) {
-      if (checkTolerantTouch(c, 5)) {
+      if (checkTolerantTouch(c, 1)) {
         gameOver = true;
         return;
       }
