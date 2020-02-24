@@ -41,8 +41,9 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
   }
 
   public DrakeInTheSky() {
-    super(new Drake<>(new Vertex(blocksX / 2 * blockSize, blocksY / 2 * blockSize), 5, blockSize, width, height), width,
-        height);
+    super(new Drake<>(
+        new Vertex(blocksX / 2 * blockSize, blocksY / 2 * blockSize), 5,
+        blockSize, width, height), width, height);
     this.drake = (Drake<I>) getPlayer();
 
     newScoreObject();
@@ -51,8 +52,10 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     getGOss().add(drake.getTail());
     getGOss().add(cloud);
 
-    background = new LeftRightgImage<I>("background.png", new Vertex(0, 0), new Vertex(0, 0));
-    help = new LeftRightgImage<I>("start-screen.png", new Vertex(0, 0), new Vertex(0, 0));
+    background = new LeftRightgImage<I>("background.png", new Vertex(0, 0),
+        new Vertex(0, 0));
+    help = new LeftRightgImage<I>("start-screen.png", new Vertex(0, 0),
+        new Vertex(0, 0));
 
     pause();
 
@@ -63,15 +66,20 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     for (int i = blockSize; i < width - blockSize; i = i + cloudWidth) {
       cloud.add(new ImageObject<I>("cloud-top.png", new Vertex(i, 0)));
     }
-    cloud.add(new ImageObject<I>("cloud-top-right.png", new Vertex(width - blockSize, 0)));
+    cloud.add(new ImageObject<I>("cloud-top-right.png",
+        new Vertex(width - blockSize, 0)));
     for (int i = blockSize; i < height - blockSize; i = i + cloudWidth) {
-      cloud.add(new ImageObject<I>("cloud-right.png", new Vertex(width - blockSize, i)));
+      cloud.add(new ImageObject<I>("cloud-right.png",
+          new Vertex(width - blockSize, i)));
     }
-    cloud.add(new ImageObject<I>("cloud-bottom-right.png", new Vertex(width - blockSize, height - blockSize)));
+    cloud.add(new ImageObject<I>("cloud-bottom-right.png",
+        new Vertex(width - blockSize, height - blockSize)));
     for (int i = blockSize; i < width - blockSize; i = i + cloudWidth) {
-      cloud.add(new ImageObject<I>("cloud-bottom.png", new Vertex(i, height - blockSize)));
+      cloud.add(new ImageObject<I>("cloud-bottom.png",
+          new Vertex(i, height - blockSize)));
     }
-    cloud.add(new ImageObject<I>("cloud-bottom-left.png", new Vertex(0, height - blockSize)));
+    cloud.add(new ImageObject<I>("cloud-bottom-left.png",
+        new Vertex(0, height - blockSize)));
     for (int i = blockSize; i < height - blockSize; i = i + cloudWidth) {
       cloud.add(new ImageObject<I>("cloud-left.png", new Vertex(0, i)));
     }
@@ -206,7 +214,8 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     return true;
   }
 
-  private void removeGameObject(List<? extends GameObject<I>> list, GameObject<I> obj) {
+  private void removeGameObject(List<? extends GameObject<I>> list,
+      GameObject<I> obj) {
     int i = getGOss().indexOf(list);
     getGOss().get(i).remove(obj);
     obj = null;
@@ -246,18 +255,21 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     int randomObj = (int) (Math.random() * 100);
     ScoreObject<I> obj = null;
     if (randomObj < 30) {
-      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-          10, true);
-//      obj = new ScoreObject<I>("energy-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
-//          new Vertex(0, 0), 1, speedUp);
+//      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
+//          10, true);
+      obj = new ScoreObject<I>("energy-orb.png",
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+          new Vertex(0, 0), 1, speedUp);
     } else if (randomObj < 70) {
-      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-          10, true);
-//      obj = new ScoreObject<I>("magic-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
-//          new Vertex(0, 0), 5, KeyCode.VK_SPACE);
+//      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
+//          10, true);
+      obj = new ScoreObject<I>("magic-orb.png",
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+          new Vertex(0, 0), 5, KeyCode.VK_SPACE);
     } else if (randomObj < 100) {
-      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-          10, true);
+      obj = new ScoreObject<I>("fire-orb.png",
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+          new Vertex(0, 0), 10, true);
     }
     if (obj != null) {
       scoreObjects.add(obj);
