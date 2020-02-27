@@ -22,6 +22,9 @@ public class Snake<I> extends LeftRightgImage<I> {
     NONE, LEFT, RIGHT;
   }
 
+  Vertex startCorner = new Vertex(0, 0);;
+  Vertex startVelocity = new Vertex(0, 0);;
+  int startBodySize;
   int blockSize;
   int width;
   int height;
@@ -37,6 +40,9 @@ public class Snake<I> extends LeftRightgImage<I> {
   public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize, int width, int height, String headRight,
       String bodyImage, String tailLeft) {
     super(headRight, corner, velocity);
+    this.startCorner.moveTo(corner);
+    this.startVelocity.moveTo(velocity);
+    this.startBodySize = bodySize;
     this.headRight = headRight;
     this.bodyImage = bodyImage;
     this.tailLeft = tailLeft;
@@ -44,15 +50,28 @@ public class Snake<I> extends LeftRightgImage<I> {
     this.width = width;
     this.height = height;
 
-    for (int i = 0; i < bodySize; i++) {
-      body.add(
-          new LeftRightgImage<I>(bodyImage, new Vertex(corner.x - (i + 1) * blockSize, corner.y), new Vertex(1, 0)));
-    }
-    tail.add(new LeftRightgImage<I>(tailLeft, new Vertex(corner.x - (bodySize + 1) * blockSize, corner.y),
-        new Vertex(1, 0)));
+    createBodyAndTail(bodySize);
+
   }
 
-  public void init(int bodySize) {
+  public void reset() {
+    direction = Direction.RIGHT;
+    this.setImageFileName(headRight);
+    this.getPos().moveTo(startCorner);
+    this.getVelocity().moveTo(startVelocity);
+    body.clear();
+    tail.clear();
+    this.speed = 1;
+    createBodyAndTail(startBodySize);
+  }
+
+  private void createBodyAndTail(int bodySize) {
+    for (int i = 0; i < bodySize; i++) {
+      body.add(new LeftRightgImage<I>(bodyImage, new Vertex(startCorner.x - (i + 1) * blockSize, startCorner.y),
+          new Vertex(1, 0)));
+    }
+    tail.add(new LeftRightgImage<I>(tailLeft, new Vertex(startCorner.x - (bodySize + 1) * blockSize, startCorner.y),
+        new Vertex(1, 0)));
   }
 
   public List<LeftRightgImage<I>> getBody() {
