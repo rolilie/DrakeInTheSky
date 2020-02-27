@@ -104,7 +104,6 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       g.drawString(50, 60, "Body size: " + drake.getBody().size());
       g.drawString(50, 80, "Collected: " + collectedObjects);
     }
-
   }
 
   private void help() {
