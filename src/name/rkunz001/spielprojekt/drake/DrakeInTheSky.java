@@ -5,6 +5,7 @@ import java.util.List;
 
 import name.panitz.game.framework.AbstractGame;
 import name.panitz.game.framework.AbstractGameObject;
+import name.panitz.game.framework.Button;
 import name.panitz.game.framework.GameObject;
 import name.panitz.game.framework.GraphicsTool;
 import name.panitz.game.framework.ImageObject;
@@ -56,6 +57,9 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     helpScreen = new LeftRightgImage<I>("help.png", new Vertex(0, 0), new Vertex(0, 0));
     gameOverScreen = new LeftRightgImage<I>("gameover.png", new Vertex(0, 0), new Vertex(0, 0));
 
+    getButtons().add(new Button("Start/Pause", () -> startStop()));
+    getButtons().add(new Button("Reset", () -> reset()));
+    getButtons().add(new Button("Help/Restart", () -> help()));
     pause();
 
   }
@@ -101,6 +105,32 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       g.drawString(50, 80, "Collected: " + collectedObjects);
     }
 
+  }
+
+  private void help() {
+    if (getHelp) {
+      getHelp = false;
+      start();
+    } else {
+      pause();
+      getHelp = true;
+    }
+  }
+
+  public void startStop() {
+    if (isStopped()) {
+      getHelp = false;
+      super.start();
+    } else {
+      super.pause();
+    }
+  }
+
+  @Override
+  public void pause() {
+    if (isStopped() == false) {
+      super.pause();
+    }
   }
 
   @Override
@@ -215,21 +245,13 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         drake.turnRight();
         break;
       case VK_S:
-        if (isStopped()) {
-          start();
-        }
+        startStop();
+        break;
       case VK_P:
-        if (isStopped() == false) {
-          pause();
-        }
+        startStop();
+        break;
       case VK_H:
-        if (getHelp) {
-          getHelp = false;
-          start();
-        } else {
-          pause();
-          getHelp = true;
-        }
+        help();
         break;
       case VK_R:
         if (gameOver) {
