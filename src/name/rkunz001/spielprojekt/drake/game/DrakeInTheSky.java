@@ -154,7 +154,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
   public void doChecks() {
 
     if (drake.getPos().x < blockSize - 1
-        || drake.getPos().x > width - (blockSize - 1)
+        || drake.getPos().x > width - (blockSize + 1)
         || drake.getPos().y < blockSize - 1
         || drake.getPos().y > height - (blockSize + 1)) {
       gameOver = true;
