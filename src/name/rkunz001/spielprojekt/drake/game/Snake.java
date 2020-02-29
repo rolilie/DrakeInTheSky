@@ -13,10 +13,10 @@ public class Snake<I> extends LeftRightgImage<I> {
   String headUp = "head.png";
   String headDown = "head.png";
   String bodyImage = "body.png";
-  String tailRight = "tail.png";
-  String tailLeft = "tail.png";
-  String tailUp = "tail.png";
-  String tailDown = "tail.png";
+  String tailRight = "tail-right.png";
+  String tailLeft = "tail-left.png";
+  String tailUp = "tail-up.png";
+  String tailDown = "tail-down.png";
 
   enum Turn {
     NONE, LEFT, RIGHT;
@@ -238,7 +238,6 @@ public class Snake<I> extends LeftRightgImage<I> {
           break;
         default:
           break;
-
         }
         nextTurn = Turn.NONE;
       }
@@ -252,6 +251,22 @@ public class Snake<I> extends LeftRightgImage<I> {
     }
 
     moveBodyOrTail(tail.get(0), pre);
+    switch (tail.get(0).getDirection()) {
+    case DOWN:
+      tail.get(0).setImageFileName(tailUp);
+      break;
+    case LEFT:
+      tail.get(0).setImageFileName(tailRight);
+      break;
+    case RIGHT:
+      tail.get(0).setImageFileName(tailLeft);
+      break;
+    case UP:
+      tail.get(0).setImageFileName(tailDown);
+      break;
+    default:
+      break;
+    }
 
   }
 
