@@ -1,4 +1,4 @@
-package name.rkunz001.spielprojekt.drake;
+package name.rkunz001.spielprojekt.drake.game;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ import name.panitz.game.framework.GraphicsTool;
 import name.panitz.game.framework.ImageObject;
 import name.panitz.game.framework.KeyCode;
 import name.panitz.game.framework.Vertex;
+import name.rkunz001.spielprojekt.drake.game.Snake.Turn;
 
 public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
@@ -21,8 +22,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
   private static int width = blocksX * blockSize;
   private static int height = blocksY * blockSize;
 
-  int speedUp = 1;
-  KeyCode keyPressed;
+  private KeyCode actionKeyPressed;
   boolean dangereousBody = false;
 
   int score = 0;
@@ -38,13 +38,19 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
   ImageObject<I> helpScreen;
   ImageObject<I> gameOverScreen;
 
+  MagicOrb<I> magicOrb;
+  FireOrb<I> fireOrb;
+  EnergyOrb<I> energyOrb;
+  ShimmerOrb<I> shimmerOrb;
+
   enum ScoreObjects {
     APPLE, BANANA, CHERRY;
   }
 
   public DrakeInTheSky() {
-    super(new Drake<>(new Vertex(blocksX / 2 * blockSize, blocksY / 2 * blockSize), 5, blockSize, width, height), width,
-        height);
+    super(new Drake<>(
+        new Vertex(blocksX / 2 * blockSize, blocksY / 2 * blockSize), 5,
+        blockSize, width, height), width, height);
     this.drake = (Drake<I>) getPlayer();
 
     newScoreObject();
@@ -52,10 +58,14 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     getGOss().add(drake.getBody());
     getGOss().add(drake.getTail());
     getGOss().add(cloud);
+    getGOss().add(scoreObjects);
 
-    background = new LeftRightgImage<I>("background.png", new Vertex(0, 0), new Vertex(0, 0));
-    helpScreen = new LeftRightgImage<I>("help.png", new Vertex(0, 0), new Vertex(0, 0));
-    gameOverScreen = new LeftRightgImage<I>("gameover.png", new Vertex(0, 0), new Vertex(0, 0));
+    background = new LeftRightgImage<I>("background.png", new Vertex(0, 0),
+        new Vertex(0, 0));
+    helpScreen = new LeftRightgImage<I>("help.png", new Vertex(0, 0),
+        new Vertex(0, 0));
+    gameOverScreen = new LeftRightgImage<I>("gameover.png", new Vertex(0, 0),
+        new Vertex(0, 0));
 
     getButtons().add(new Button("Start/Pause", () -> startStop()));
     getButtons().add(new Button("Reset", () -> reset()));
@@ -69,15 +79,20 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     for (int i = blockSize; i < width - blockSize; i = i + cloudWidth) {
       cloud.add(new ImageObject<I>("cloud-top.png", new Vertex(i, 0)));
     }
-    cloud.add(new ImageObject<I>("cloud-top-right.png", new Vertex(width - blockSize, 0)));
+    cloud.add(new ImageObject<I>("cloud-top-right.png",
+        new Vertex(width - blockSize, 0)));
     for (int i = blockSize; i < height - blockSize; i = i + cloudWidth) {
-      cloud.add(new ImageObject<I>("cloud-right.png", new Vertex(width - blockSize, i)));
+      cloud.add(new ImageObject<I>("cloud-right.png",
+          new Vertex(width - blockSize, i)));
     }
-    cloud.add(new ImageObject<I>("cloud-bottom-right.png", new Vertex(width - blockSize, height - blockSize)));
+    cloud.add(new ImageObject<I>("cloud-bottom-right.png",
+        new Vertex(width - blockSize, height - blockSize)));
     for (int i = blockSize; i < width - blockSize; i = i + cloudWidth) {
-      cloud.add(new ImageObject<I>("cloud-bottom.png", new Vertex(i, height - blockSize)));
+      cloud.add(new ImageObject<I>("cloud-bottom.png",
+          new Vertex(i, height - blockSize)));
     }
-    cloud.add(new ImageObject<I>("cloud-bottom-left.png", new Vertex(0, height - blockSize)));
+    cloud.add(new ImageObject<I>("cloud-bottom-left.png",
+        new Vertex(0, height - blockSize)));
     for (int i = blockSize; i < height - blockSize; i = i + cloudWidth) {
       cloud.add(new ImageObject<I>("cloud-left.png", new Vertex(0, i)));
     }
@@ -93,6 +108,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       g.drawString(50, 40, "Points   : " + score);
       g.drawString(50, 60, "Body size: " + drake.getBody().size());
       g.drawString(50, 80, "Collected: " + collectedObjects);
+      g.drawString(50, 100, "Speed    : " + drake.getSpeed());
       if (gameOver) {
         g.drawString(50, 100, "Game over");
       }
@@ -103,6 +119,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       g.drawString(50, 40, "Points   : " + score);
       g.drawString(50, 60, "Body size: " + drake.getBody().size());
       g.drawString(50, 80, "Collected: " + collectedObjects);
+      g.drawString(50, 100, "Speed   : " + drake.getSpeed());
     }
   }
 
@@ -134,13 +151,13 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
   @Override
   public void doChecks() {
-    for (ImageObject<I> c : cloud) {
-      if (drake.touches(c)) {
-        if (checkTolerantTouch(c, 5, 3)) {
-          gameOver = true;
-          return;
-        }
-      }
+
+    if (drake.getPos().x < blockSize - 1
+        || drake.getPos().x > width - (blockSize - 1)
+        || drake.getPos().y < blockSize - 1
+        || drake.getPos().y > height - (blockSize + 1)) {
+      gameOver = true;
+      return;
     }
 
     if (dangereousBody) {
@@ -150,17 +167,16 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
       }
     }
 
-    if (scoreObjects.size() > 0 && drake.touches(scoreObjects.get(0))) {
-      if (checkTolerantTouch(scoreObjects.get(0), 15)) {
-        if (!checkScoreObject()) {
-          gameOver = true;
-          return;
-        }
-
-        drake.grow();
-        collectedObjects++;
-        newScoreObject();
+    if (scoreObjects.size() > 0
+        && checkTolerantTouch(scoreObjects.get(0), 15)) {
+      if (!checkScoreObject()) {
+        gameOver = true;
+        return;
       }
+
+      drake.grow();
+      collectedObjects++;
+      newScoreObject();
     }
   }
 
@@ -168,68 +184,69 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     boolean first = true;
     for (LeftRightgImage<I> b : drake.getBody()) {
       if (drake.touches(b) && !first) {
-        return checkTolerantTouch(b, 15);
+        return checkTolerantTouch(b, 10);
       }
       first = false;
     }
-    if (drake.touches(drake.getTail().get(0))) {
-      return checkTolerantTouch(drake.getTail().get(0), 15);
-    }
-
-    return false;
+    return checkTolerantTouch(drake.getTail().get(0), 15);
   }
 
-  // touch detection is to sensitive, make it more tolerant
+  // touch detection is too sensitive, make it more tolerant
   private boolean checkTolerantTouch(AbstractGameObject<I> b, int tolerance) {
-    return checkTolerantTouch(b, tolerance, 1);
-  }
 
-  // touch detection is to sensitive, make it more tolerant
-  private boolean checkTolerantTouch(AbstractGameObject<I> b, int tolerance, int blocks) {
+    if (drake.touches(b)) {
+      double x = Math.abs(b.getPos().x - drake.getPos().x);
+      double y = Math.abs(drake.getPos().y - b.getPos().y);
 
-    double x = Math.abs(b.getPos().x - drake.getPos().x);
-    double y = Math.abs(drake.getPos().y - b.getPos().y);
-
-    switch (drake.getDirection()) {
-    case DOWN:
-    case UP:
-      if (y < blockSize - tolerance && x < blockSize * blocks) {
-        return true;
+      switch (drake.getDirection()) {
+      case DOWN:
+      case UP:
+        if (y < blockSize - tolerance && x < blockSize - tolerance) {
+          return true;
+        }
+        break;
+      case LEFT:
+      case RIGHT:
+        if (x < blockSize - tolerance && y < blockSize - tolerance) {
+          return true;
+        }
+        break;
       }
-      break;
-    case LEFT:
-    case RIGHT:
-      if (x < blockSize - tolerance && y < blockSize * blocks) {
-        return true;
-      }
-      break;
     }
     return false;
-
   }
 
   private boolean checkScoreObject() {
     ScoreObject<I> so = removeScoreObject();
 
-    if (so.getKeyCode() != null && so.getKeyCode() != keyPressed) {
-      return false;
-    }
-
-    if (so.getSpeedUp() > 0) {
-      int speed = drake.getSpeed() + so.getSpeedUp();
-      drake.setSpeed(speed);
-      for (LeftRightgImage<I> b : drake.getBody()) {
-        b.setSpeed(speed);
+    if (magicOrb != null) {
+      KeyCode k = magicOrb.getKeyCode();
+      magicOrb = null;
+      if (k != actionKeyPressed) {
+        return false;
       }
-      drake.getTail().get(0).setSpeed(speed);
     }
 
-    if (so.isToggle()) {
+    if (energyOrb != null) {
+      int speed = energyOrb.getSpeedUp();
+      drake.speedUp(speed);
+      energyOrb = null;
+    }
+
+    if (shimmerOrb != null) {
+      shimmerOrb = null;
+    }
+
+    if (fireOrb != null) {
       dangereousBody = true;
+      fireOrb = null;
     } else {
       dangereousBody = false;
     }
+
+    actionKeyPressed = null;
     score += so.getScore();
+    so = null;
     return true;
   }
 
@@ -238,10 +255,10 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     if (keycode != null) {
       switch (keycode) {
       case LEFT_ARROW:
-        drake.turnLeft();
+        drake.turn(Turn.LEFT);
         break;
       case RIGHT_ARROW:
-        drake.turnRight();
+        drake.turn(Turn.RIGHT);
         break;
       case VK_S:
         startStop();
@@ -253,16 +270,19 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         help();
         break;
       case VK_R:
-        if (gameOver) {
-          reset();
-        }
+        reset();
+        break;
+      case VK_SPACE:
+        actionKeyPressed = keycode;
+        break;
+      case VK_Q:
+        System.exit(0);
+        ;
         break;
       default:
         ;
       }
     }
-
-    keyPressed = keycode;
   }
 
   private void reset() {
@@ -281,24 +301,26 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
   private void newScoreObject() {
     int randomObj = (int) (Math.random() * 100);
-    ScoreObject<I> obj = null;
-    if (randomObj < 30) {
-//      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-//          10, true);
-      obj = new ScoreObject<I>("energy-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
-          new Vertex(0, 0), 1, speedUp);
-    } else if (randomObj < 70) {
-//      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-//          10, true);
-      obj = new ScoreObject<I>("magic-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+    if (randomObj < 25) {
+      energyOrb = new EnergyOrb<I>(
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+          new Vertex(0, 0), 1, 1);
+      scoreObjects.add(energyOrb);
+    } else if (randomObj < 45) {
+      magicOrb = new MagicOrb<I>(
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
           new Vertex(0, 0), 5, KeyCode.VK_SPACE);
+      scoreObjects.add(magicOrb);
+    } else if (randomObj < 80) {
+      fireOrb = new FireOrb<I>(
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+          new Vertex(0, 0), 10);
+      scoreObjects.add(fireOrb);
     } else if (randomObj < 100) {
-      obj = new ScoreObject<I>("fire-orb.png", new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)), new Vertex(0, 0),
-          10, true);
-    }
-    if (obj != null) {
-      scoreObjects.add(obj);
-      getGOss().add(scoreObjects);
+      shimmerOrb = new ShimmerOrb<I>(
+          new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+          new Vertex(0, 0), 15, width, height, blockSize);
+      scoreObjects.add(shimmerOrb);
     }
   }
 

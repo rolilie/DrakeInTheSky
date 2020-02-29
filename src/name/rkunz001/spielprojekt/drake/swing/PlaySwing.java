@@ -1,6 +1,7 @@
-package name.rkunz001.spielprojekt.drake;
+package name.rkunz001.spielprojekt.drake.swing;
 
 import name.panitz.game.framework.swing.SwingGame;
+import name.rkunz001.spielprojekt.drake.game.DrakeInTheSky;
 
 public class PlaySwing {
 

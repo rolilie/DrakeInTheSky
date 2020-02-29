@@ -1,6 +1,7 @@
-package name.rkunz001.spielprojekt.drake;
+package name.rkunz001.spielprojekt.drake.fx;
 
 import name.panitz.game.framework.fx.GameApplication;
+import name.rkunz001.spielprojekt.drake.game.DrakeInTheSky;
 
 public class PlayFX extends GameApplication {
 

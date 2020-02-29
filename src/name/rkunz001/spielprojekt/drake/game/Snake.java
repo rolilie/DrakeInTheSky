@@ -1,4 +1,4 @@
-package name.rkunz001.spielprojekt.drake;
+package name.rkunz001.spielprojekt.drake.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +28,8 @@ public class Snake<I> extends LeftRightgImage<I> {
   int blockSize;
   int width;
   int height;
-  List<LeftRightgImage<I>> body = Collections.synchronizedList(new ArrayList<>());
+  List<LeftRightgImage<I>> body = Collections
+      .synchronizedList(new ArrayList<>());
   List<LeftRightgImage<I>> tail = new ArrayList<>();
 
   boolean stopped = false;
@@ -36,9 +37,52 @@ public class Snake<I> extends LeftRightgImage<I> {
   double turnX;
   double turnY;
   boolean growing = false;
+  int speed = 1;
 
-  public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize, int width, int height, String headRight,
-      String bodyImage, String tailLeft) {
+  public int getSpeed() {
+    return speed;
+  }
+
+  public void setSpeed(int speed) {
+    this.speed = speed;
+    setSpeed(this, speed);
+    for (LeftRightgImage<I> b : body) {
+      setSpeed(b, speed);
+    }
+    setSpeed(tail.get(0), speed);
+  }
+
+  public void speedUp(int speed) {
+    this.speed += speed;
+    setSpeed(this.speed);
+  }
+
+  public void speedDown(int speed) {
+    this.speed -= speed;
+    setSpeed(speed);
+  }
+
+  public void setSpeed(LeftRightgImage<I> obj, int speed) {
+    if (obj.getVelocity().x != 0) {
+      if (obj.getVelocity().x > 0) {
+        obj.getVelocity().x = speed;
+      } else {
+        obj.getVelocity().x = speed * -1;
+      }
+    }
+
+    if (obj.getVelocity().y != 0) {
+      if (obj.getVelocity().y > 0) {
+        obj.getVelocity().y = speed;
+      } else if (obj.getVelocity().y < 0) {
+        obj.getVelocity().y = speed * -1;
+      }
+    }
+  }
+
+  public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize,
+      int width, int height, String headRight, String bodyImage,
+      String tailLeft) {
     super(headRight, corner, velocity);
     this.startCorner.moveTo(corner);
     this.startVelocity.moveTo(velocity);
@@ -67,10 +111,12 @@ public class Snake<I> extends LeftRightgImage<I> {
 
   private void createBodyAndTail(int bodySize) {
     for (int i = 0; i < bodySize; i++) {
-      body.add(new LeftRightgImage<I>(bodyImage, new Vertex(startCorner.x - (i + 1) * blockSize, startCorner.y),
+      body.add(new LeftRightgImage<I>(bodyImage,
+          new Vertex(startCorner.x - (i + 1) * blockSize, startCorner.y),
           new Vertex(1, 0)));
     }
-    tail.add(new LeftRightgImage<I>(tailLeft, new Vertex(startCorner.x - (bodySize + 1) * blockSize, startCorner.y),
+    tail.add(new LeftRightgImage<I>(tailLeft,
+        new Vertex(startCorner.x - (bodySize + 1) * blockSize, startCorner.y),
         new Vertex(1, 0)));
   }
 
@@ -82,43 +128,44 @@ public class Snake<I> extends LeftRightgImage<I> {
     return tail;
   }
 
-  public void grow() {
-    growing = true;
+  public void turn(Turn turn) {
+    nextTurn = turn;
+    calcNextTurnPos();
   }
 
-  public LeftRightgImage<I> newBody(LeftRightgImage<I> pre) {
+  public void grow() {
 
+    LeftRightgImage<I> p = body.get(body.size() - 1);
     LeftRightgImage<I> t = tail.get(0);
     LeftRightgImage<I> obj = null;
 
-    switch (direction) {
+    Vertex v = new Vertex(p.getVelocity().x, p.getVelocity().y);
+    switch (p.getDirection()) {
     case DOWN:
-      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x, pre.getPos().y - blockSize), new Vertex(0, 1));
-      obj.down();
+      obj = new LeftRightgImage<I>(p.getImageFileName(),
+          new Vertex(p.getPos().x, p.getPos().y - blockSize), v, p.direction);
       t.getPos().y = obj.getPos().y - blockSize;
       break;
     case LEFT:
-      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x + blockSize, pre.getPos().y),
-          new Vertex(-1, 01));
-      obj.left();
+      obj = new LeftRightgImage<I>(p.getImageFileName(),
+          new Vertex(p.getPos().x + blockSize, p.getPos().y), v, p.direction);
       t.getPos().x = obj.getPos().x + blockSize;
       break;
     case RIGHT:
-      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x, pre.getPos().y - blockSize), new Vertex(1, 0));
-      obj.right();
+      obj = new LeftRightgImage<I>(p.getImageFileName(),
+          new Vertex(p.getPos().x, p.getPos().y - blockSize), v, p.direction);
       t.getPos().x = obj.getPos().x - blockSize;
       break;
     case UP:
-      obj = new LeftRightgImage<I>(bodyImage, new Vertex(pre.getPos().x, pre.getPos().y + blockSize),
-          new Vertex(0, -1));
-      obj.up();
+      obj = new LeftRightgImage<I>(p.getImageFileName(),
+          new Vertex(p.getPos().x, p.getPos().y + blockSize), v, p.direction);
       t.getPos().y = obj.getPos().y + blockSize;
       break;
     default:
       break;
     }
-    obj.setSpeed(pre.getSpeed());
-    return obj;
+
+    body.add(obj);
   }
 
   public boolean shrink() {
@@ -143,9 +190,6 @@ public class Snake<I> extends LeftRightgImage<I> {
 
   @Override
   public void move() {
-    if (stopped) {
-      return;
-    }
     if (nextTurn != Turn.NONE) {
 
       boolean turn = false;
@@ -175,9 +219,9 @@ public class Snake<I> extends LeftRightgImage<I> {
         getPos().x = turnX;
         getPos().y = turnY;
         if (nextTurn == Turn.LEFT) {
-          super.turnLeft();
-        } else {
-          super.turnRight();
+          turnLeft();
+        } else if (nextTurn == Turn.RIGHT) {
+          turnRight();
         }
         switch (direction) {
         case DOWN:
@@ -207,131 +251,107 @@ public class Snake<I> extends LeftRightgImage<I> {
       pre = b;
     }
 
-    if (growing) {
-      growing = false;
-      LeftRightgImage<I> b = newBody(pre);
-      body.add(b);
-      moveBodyOrTail(b, pre);
-    }
     moveBodyOrTail(tail.get(0), pre);
 
   }
 
-  synchronized protected void moveBodyOrTail(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+  private void moveBodyOrTail(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+    double absX = Math.abs(obj.getPos().x - pre.getPos().x);
+    double absY = Math.abs(obj.getPos().y - pre.getPos().y);
     switch (pre.getDirection()) {
     case LEFT:
-      if (obj.getPos().x - pre.getPos().x > 35) {
+      if (absX > 35) {
         obj.getPos().x = pre.getPos().x + blockSize;
         obj.getPos().y = pre.getPos().y;
-        obj.left();
+        if (obj.getDirection() == Direction.UP) {
+          obj.turnLeft();
+        } else {
+          obj.turnRight();
+        }
       }
       break;
     case RIGHT:
-      if (pre.getPos().x - obj.getPos().x > 35) {
+      if (absX > 35) {
         obj.getPos().x = pre.getPos().x - blockSize;
         obj.getPos().y = pre.getPos().y;
-        obj.right();
+        if (obj.getDirection() == Direction.UP) {
+          obj.turnRight();
+        } else {
+          obj.turnLeft();
+        }
       }
       break;
     case UP:
-      if (obj.getPos().y - pre.getPos().y > 35) {
+      if (absY > 35) {
         obj.getPos().x = pre.getPos().x;
         obj.getPos().y = pre.getPos().y + blockSize;
-        obj.up();
+        if (obj.getDirection() == Direction.RIGHT) {
+          obj.turnLeft();
+        } else {
+          obj.turnRight();
+        }
       }
       break;
     case DOWN:
-      if (pre.getPos().y - obj.getPos().y > 35) {
+      if (absY > 35) {
         obj.getPos().x = pre.getPos().x;
         obj.getPos().y = pre.getPos().y - blockSize;
-        obj.down();
+        if (obj.getDirection() == Direction.RIGHT) {
+          obj.turnRight();
+        } else {
+          obj.turnLeft();
+        }
       }
       break;
     }
 
-    fixDirection(obj, pre);
+//    fixDirection(obj, pre);
   }
 
   // keys pressed twice in quick succession it required to correct the moving
   // direction
-  private void fixDirection(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
-    if (obj.getDirection() == pre.getDirection()) {
-      switch (pre.getDirection()) {
-      case LEFT:
-        if (obj.getPos().y != pre.getPos().y) {
-          if (obj.getPos().y > pre.getPos().y) {
-            obj.up();
-          } else {
-            obj.down();
-          }
-        }
-        break;
-      case RIGHT:
-        if (obj.getPos().y != pre.getPos().y) {
-          if (obj.getPos().y > pre.getPos().y) {
-            obj.up();
-          } else {
-            obj.down();
-          }
-        }
-        break;
-      case UP:
-        if (obj.getPos().x != pre.getPos().x) {
-          if (obj.getPos().x > pre.getPos().x) {
-            obj.left();
-          } else {
-            obj.right();
-          }
-        }
-        break;
-      case DOWN:
-        if (obj.getPos().x != pre.getPos().x) {
-          if (obj.getPos().x > pre.getPos().x) {
-            obj.left();
-          } else {
-            obj.right();
-          }
-        }
-        break;
-      }
-    }
-  }
-
-  @Override
-  public void stop() {
-    super.stop();
-    for (LeftRightgImage<I> b : body) {
-      b.stop();
-    }
-    tail.get(0).stop();
-    stopped = true;
-  }
-
-  @Override
-  public void restart() {
-    super.restart();
-    for (LeftRightgImage<I> b : body) {
-      b.restart();
-    }
-    tail.get(0).restart();
-    stopped = false;
-  }
-
-  public boolean isStopped() {
-    return stopped;
-  }
-
-  @Override
-  public void turnLeft() {
-    nextTurn = Turn.LEFT;
-    calcNextTurnPos();
-  }
-
-  @Override
-  public void turnRight() {
-    nextTurn = Turn.RIGHT;
-    calcNextTurnPos();
-  }
+//  private void fixDirection(LeftRightgImage<I> obj, LeftRightgImage<I> pre) {
+//    if (obj.getDirection() == pre.getDirection()) {
+//      switch (pre.getDirection()) {
+//      case LEFT:
+//        if (obj.getPos().y != pre.getPos().y) {
+//          if (obj.getPos().y > pre.getPos().y) {
+//            obj.up();
+//          } else {
+//            obj.down();
+//          }
+//        }
+//        break;
+//      case RIGHT:
+//        if (obj.getPos().y != pre.getPos().y) {
+//          if (obj.getPos().y > pre.getPos().y) {
+//            obj.up();
+//          } else {
+//            obj.down();
+//          }
+//        }
+//        break;
+//      case UP:
+//        if (obj.getPos().x != pre.getPos().x) {
+//          if (obj.getPos().x > pre.getPos().x) {
+//            obj.left();
+//          } else {
+//            obj.right();
+//          }
+//        }
+//        break;
+//      case DOWN:
+//        if (obj.getPos().x != pre.getPos().x) {
+//          if (obj.getPos().x > pre.getPos().x) {
+//            obj.left();
+//          } else {
+//            obj.right();
+//          }
+//        }
+//        break;
+//      }
+//    }
+//  }
 
   private void calcNextTurnPos() {
     switch (getDirection()) {

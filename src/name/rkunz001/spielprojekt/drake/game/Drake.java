@@ -1,4 +1,4 @@
-package name.rkunz001.spielprojekt.drake;
+package name.rkunz001.spielprojekt.drake.game;
 
 import name.panitz.game.framework.Vertex;
 
@@ -8,9 +8,10 @@ public class Drake<I> extends Snake<I> {
   static String BODY_IMAGE = "drake-body.gif";
   static String TAIL_IMAGE = "drake-body.png";
 
-  public Drake(Vertex corner, int bodySize, int blockSize, int width, int height) {
-    super(corner, new Vertex(1, 0), bodySize, blockSize, width, height, "drake-right.png", "drake-body.png",
-        "tail-left.png");
+  public Drake(Vertex corner, int bodySize, int blockSize, int width,
+      int height) {
+    super(corner, new Vertex(1, 0), bodySize, blockSize, width, height,
+        "drake-right.png", "drake-body.png", "tail-left.png");
     this.blockSize = blockSize;
 
     headLeft = "drake-left.png";
@@ -20,5 +21,4 @@ public class Drake<I> extends Snake<I> {
     tailUp = "tail-up.png";
     tailDown = "tail-down.png";
   }
-
 }
