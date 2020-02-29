@@ -64,10 +64,10 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         new Vertex(0, 0));
     helpScreen = new LeftRightgImage<I>("help.png", new Vertex(0, 0),
         new Vertex(0, 0));
-    gameOverScreen = new LeftRightgImage<I>("gameover.png", new Vertex(0, 0),
-        new Vertex(0, 0));
+    gameOverScreen = new LeftRightgImage<I>("gameover.png",
+        new Vertex(160, 176), new Vertex(0, 0));
 
-    getButtons().add(new Button("Start/Pause", () -> startStop()));
+    getButtons().add(new Button("Start/Pause", () -> startPause()));
     getButtons().add(new Button("Reset", () -> reset()));
     getButtons().add(new Button("Help/Restart", () -> help()));
     getButtons().add(new Button("Exit", () -> System.exit(0)));
@@ -105,22 +105,20 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     if (getHelp) {
       helpScreen.paintTo(g);
     } else if (gameOver) {
+      background.paintTo(g);
+      g.drawString(40, 50, "Points   : " + score);
+      g.drawString(40, 70, "Body size: " + drake.getBody().size());
+      g.drawString(40, 90, "Collected: " + collectedObjects);
+      g.drawString(40, 110, "Speed    : " + drake.getSpeed());
       gameOverScreen.paintTo(g);
-      g.drawString(50, 40, "Points   : " + score);
-      g.drawString(50, 60, "Body size: " + drake.getBody().size());
-      g.drawString(50, 80, "Collected: " + collectedObjects);
-      g.drawString(50, 100, "Speed    : " + drake.getSpeed());
-      if (gameOver) {
-        g.drawString(50, 100, "Game over");
-      }
       pause();
     } else {
       background.paintTo(g);
+      g.drawString(40, 50, "Points   : " + score);
+      g.drawString(40, 70, "Body size: " + drake.getBody().size());
+      g.drawString(40, 90, "Collected: " + collectedObjects);
+      g.drawString(40, 110, "Speed    : " + drake.getSpeed());
       super.paintTo(g);
-      g.drawString(50, 40, "Points   : " + score);
-      g.drawString(50, 60, "Body size: " + drake.getBody().size());
-      g.drawString(50, 80, "Collected: " + collectedObjects);
-      g.drawString(50, 100, "Speed   : " + drake.getSpeed());
     }
   }
 
@@ -134,7 +132,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     }
   }
 
-  public void startStop() {
+  public void startPause() {
     if (isStopped()) {
       getHelp = false;
       super.start();
@@ -264,10 +262,10 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         drake.turn(Turn.RIGHT);
         break;
       case VK_S:
-        startStop();
+        startPause();
         break;
       case VK_P:
-        startStop();
+        startPause();
         break;
       case VK_H:
         help();
