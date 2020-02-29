@@ -39,6 +39,24 @@ public class Snake<I> extends LeftRightgImage<I> {
   boolean growing = false;
   int speed = 1;
 
+  public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize,
+      int width, int height, String headRight, String bodyImage,
+      String tailLeft) {
+    super(headRight, corner, velocity);
+    this.startCorner.moveTo(corner);
+    this.startVelocity.moveTo(velocity);
+    this.startBodySize = bodySize;
+    this.headRight = headRight;
+    this.bodyImage = bodyImage;
+    this.tailLeft = tailLeft;
+    this.blockSize = blockSize;
+    this.width = width;
+    this.height = height;
+
+    createBodyAndTail(bodySize);
+
+  }
+
   public int getSpeed() {
     return speed;
   }
@@ -52,13 +70,13 @@ public class Snake<I> extends LeftRightgImage<I> {
     setSpeed(tail.get(0), speed);
   }
 
-  public void speedUp(int speed) {
-    this.speed += speed;
+  public void speedUp(int speedUp) {
+    this.speed += speedUp;
     setSpeed(this.speed);
   }
 
-  public void speedDown(int speed) {
-    this.speed -= speed;
+  public void speedDown(int speedDown) {
+    this.speed -= speedDown;
     setSpeed(speed);
   }
 
@@ -78,24 +96,6 @@ public class Snake<I> extends LeftRightgImage<I> {
         obj.getVelocity().y = speed * -1;
       }
     }
-  }
-
-  public Snake(Vertex corner, Vertex velocity, int bodySize, int blockSize,
-      int width, int height, String headRight, String bodyImage,
-      String tailLeft) {
-    super(headRight, corner, velocity);
-    this.startCorner.moveTo(corner);
-    this.startVelocity.moveTo(velocity);
-    this.startBodySize = bodySize;
-    this.headRight = headRight;
-    this.bodyImage = bodyImage;
-    this.tailLeft = tailLeft;
-    this.blockSize = blockSize;
-    this.width = width;
-    this.height = height;
-
-    createBodyAndTail(bodySize);
-
   }
 
   public void reset() {

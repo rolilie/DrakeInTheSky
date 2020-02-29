@@ -70,6 +70,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     getButtons().add(new Button("Start/Pause", () -> startStop()));
     getButtons().add(new Button("Reset", () -> reset()));
     getButtons().add(new Button("Help/Restart", () -> help()));
+    getButtons().add(new Button("Exit", () -> System.exit(0)));
     pause();
 
   }
@@ -169,12 +170,15 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
     if (scoreObjects.size() > 0
         && checkTolerantTouch(scoreObjects.get(0), 15)) {
+
+      // drake has to be grow before ScoreObject checks otherwise movement isn't
+      // nice after speedUp from EnergyOrb
+      drake.grow();
       if (!checkScoreObject()) {
         gameOver = true;
         return;
       }
 
-      drake.grow();
       collectedObjects++;
       newScoreObject();
     }
@@ -228,8 +232,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
     }
 
     if (energyOrb != null) {
-      int speed = energyOrb.getSpeedUp();
-      drake.speedUp(speed);
+      drake.speedUp(energyOrb.getSpeedUp());
       energyOrb = null;
     }
 
@@ -276,6 +279,7 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
         actionKeyPressed = keycode;
         break;
       case VK_Q:
+        // Very simpel Close function
         System.exit(0);
         ;
         break;
@@ -301,6 +305,10 @@ public class DrakeInTheSky<I, S> extends AbstractGame<I, S> {
 
   private void newScoreObject() {
     int randomObj = (int) (Math.random() * 100);
+//    energyOrb = new EnergyOrb<I>(
+//        new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
+//        new Vertex(0, 0), 1, 1);
+//    scoreObjects.add(energyOrb);
     if (randomObj < 25) {
       energyOrb = new EnergyOrb<I>(
           new Vertex(getRandomXY(blocksX), getRandomXY(blocksY)),
